@@ -27,7 +27,10 @@ class ProstateAblationTargetingStep(ProstateAblationStep):
     self._NeedleType = type
 
   def __init__(self, ProstateAblationSession):
-    super(ProstateAblationTargetingStep, self).__init__(ProstateAblationSession)
+    super(SlicerProstateAblationTargetingStep, self).__init__(ProstateAblationSession)
+    self.gotoSegmentationButton = self.createButton("", icon=self.startIcon, iconSize=self.iconSize,
+                                        toolTip="Go To Segmentaion Step")
+    self.gotoSegmentationButton.clicked.connect(self.onGoToSegmentButtonClicked)
     self._NeedleType = self.ICESEED
     self.tabWidget = qt.QTabWidget()
     self.layout().addWidget(self.tabWidget)
@@ -47,6 +50,10 @@ class ProstateAblationTargetingStep(ProstateAblationStep):
     if self.session.previousStep:
       self.session.previousStep.active = True
 
+  def onGoToSegmentButtonClicked(self):
+    self.tabWidget.clear()
+    self.tabWidget.addTab(self.session.segmentationEditor, "")
+
   def onFinishStepButtonClicked(self):
     #To do, deactivate the drawing buttons when finish button clicked
     self.session.data.segmentModelNode = self.session.segmentationEditor.segmentationNode()
@@ -57,7 +64,7 @@ class ProstateAblationTargetingStep(ProstateAblationStep):
     super(ProstateAblationTargetingStep, self).setupConnections()
     self.backButton.clicked.connect(self.onBackButtonClicked)
     self.finishStepButton.clicked.connect(self.onFinishStepButtonClicked)
-
+    
   def onActivation(self):
     super(ProstateAblationTargetingStep, self).onActivation()
     if not self.session.currentSeriesVolume:
@@ -69,9 +76,14 @@ class ProstateAblationTargetingStep(ProstateAblationStep):
     self.session.targetingPlugin.targetingGroupBox.visible = True
     self.session.targetingPlugin.fiducialsWidget.visible = True
     self.session.targetingPlugin.fiducialsWidget.table.visible = False
+    self.layout().addWidget(self.session.targetingPlugin.targetingGroupBox)
+    self.tabWidget.clear()
     self.tabWidget.addTab(self.session.targetingPlugin.targetingGroupBox, "")
-    self.tabWidget.addTab(self.session.segmentationEditor, "")
-    self.addNavigationButtons()
+    #self.tabWidget.addTab(self.session.segmentationEditor, "")
+    self.addTargetingNavigationButtons()
+
+  def addTargetingNavigationButtons(self):
+    self.layout().addWidget(self.createHLayout([self.backButton, self.gotoSegmentationButton, self.finishStepButton]))
 
   def updateAvailableLayouts(self):
     pass
