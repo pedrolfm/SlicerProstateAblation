@@ -9,7 +9,7 @@ from SlicerDevelopmentToolboxUtils.mixins import ModuleLogicMixin
 from SlicerDevelopmentToolboxUtils.decorators import onExceptionReturnNone, logmethod
 from SlicerDevelopmentToolboxUtils.widgets import CustomStatusProgressbar
 
-from helpers import SeriesTypeManager
+from ProstateAblationUtils.helpers import SeriesTypeManager
 
 
 class SessionData(ModuleLogicMixin):

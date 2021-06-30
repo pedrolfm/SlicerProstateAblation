@@ -8,7 +8,7 @@ import SimpleITK as sitk
 import sitkUtils
 
 from ..constants import ProstateAblationConstants
-from base import ProstateAblationLogicBase, ProstateAblationStep
+from ProstateAblationUtils.steps.base import ProstateAblationLogicBase, ProstateAblationStep
 
 from SlicerDevelopmentToolboxUtils.decorators import onModuleSelected
 from SlicerDevelopmentToolboxUtils.helpers import SliceAnnotation
@@ -46,7 +46,7 @@ class OpenSourceZFrameRegistration(ZFrameRegistrationBase):
 
     params = {'inputVolume': self.inputVolume, 'startSlice': start, 'endSlice': end,
               'outputTransform': self.outputTransform}
-    print params
+    print(params)
     slicer.cli.run(slicer.modules.zframeregistration, None, params, wait_for_completion=True)
 
 class ProstateAblationZFrameRegistrationStepLogic(ProstateAblationLogicBase):
@@ -132,7 +132,8 @@ class ProstateAblationZFrameRegistrationStepLogic(ProstateAblationLogicBase):
     self.templateConfig = []
     defaultTemplateFile = os.path.join(self.resourcesPath, "zframe", self.ZFRAME_NEEDLEPATH_CONFIG_FILE_NAME)
 
-    reader = csv.reader(open(defaultTemplateFile, 'rb'))
+    #reader = csv.reader(open(defaultTemplateFile, 'rb'))
+    reader = csv.reader(open(defaultTemplateFile, newline=''))
     try:
       next(reader)
       for row in reader:
@@ -141,7 +142,7 @@ class ProstateAblationZFrameRegistrationStepLogic(ProstateAblationLogicBase):
                                     float(row[5]), float(row[6]), float(row[7]),
                                     float(row[8])])
     except csv.Error as e:
-      print('file %s, line %d: %s' % (defaultTemplateFile, reader.line_num, e))
+      print('file PM %s, line %d: %s' % (defaultTemplateFile, reader.line_num, e))
       return
 
     self.createTemplateAndNeedlePathModel()
@@ -154,7 +155,7 @@ class ProstateAblationZFrameRegistrationStepLogic(ProstateAblationLogicBase):
     self.templatePathOrigins = []
 
     zFrameTemplateModelFile= os.path.join(self.resourcesPath, self.ZFRAME_TEMPLATE_VTK_FILE_NAME)
-    _, self.tempModelNode = slicer.util.loadModel(zFrameTemplateModelFile, returnNode=True)
+    self.tempModelNode = slicer.util.loadModel(zFrameTemplateModelFile)
     self.tempModelNode.SetName(self.ZFRAME_TEMPLATE_NAME)
     self.modelNodeTag = self.tempModelNode.AddObserver(slicer.vtkMRMLTransformableNode.TransformModifiedEvent,
                                                        self.updateTemplateVectors)

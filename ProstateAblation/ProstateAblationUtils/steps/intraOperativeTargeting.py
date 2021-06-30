@@ -27,7 +27,7 @@ class ProstateAblationTargetingStep(ProstateAblationStep):
     self._NeedleType = type
 
   def __init__(self, ProstateAblationSession):
-    super(SlicerProstateAblationTargetingStep, self).__init__(ProstateAblationSession)
+    super().__init__(ProstateAblationSession)
     self.gotoSegmentationButton = self.createButton("", icon=self.startIcon, iconSize=self.iconSize,
                                         toolTip="Go To Segmentaion Step")
     self.gotoSegmentationButton.clicked.connect(self.onGoToSegmentButtonClicked)
@@ -36,7 +36,7 @@ class ProstateAblationTargetingStep(ProstateAblationStep):
     self.layout().addWidget(self.tabWidget)
 
   def setup(self):
-    super(ProstateAblationTargetingStep, self).setup()
+    super().setup()
     self.setupTargetingPlugin()
     self.addPlugin(self.session.targetingPlugin)
     self.layout().addStretch()

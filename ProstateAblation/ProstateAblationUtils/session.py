@@ -2,11 +2,11 @@ import os, logging
 import vtk, ctk, ast, qt
 import numpy
 import slicer
-from sessionData import SessionData
+from ProstateAblationUtils.sessionData import SessionData
 from ProstateAblationUtils.constants import ProstateAblationConstants as constants
 from ProstateAblationUtils.steps.plugins.targetsDefinition import TargetsDefinitionPlugin
 from ProstateAblationUtils.steps.plugins.targetsDefinitionTable import ZFrameGuidanceComputation
-from helpers import SeriesTypeManager
+from ProstateAblationUtils.helpers import SeriesTypeManager
 
 from SlicerDevelopmentToolboxUtils.exceptions import DICOMValueError, UnknownSeriesError
 from SlicerDevelopmentToolboxUtils.constants import DICOMTAGS, FileExtension, STYLE
@@ -95,7 +95,7 @@ class ProstateAblationSession(StepBasedSession):
   def currentSeries(self, series):
     if series == self.currentSeries:
       return
-    print "set current Series on session"
+    #print "set current Series on session"
     if series and series not in self.seriesList :
       raise UnknownSeriesError("Series %s is unknown" % series)
     self._currentSeries = series
@@ -106,6 +106,7 @@ class ProstateAblationSession(StepBasedSession):
     if not self.currentSeries:
       return None
     else:
+      print(self.currentSeries)
       return self.getOrCreateVolumeForSeries(self.currentSeries)
 
   def __init__(self):
@@ -178,9 +179,9 @@ class ProstateAblationSession(StepBasedSession):
   
   
   def setupFiducialWidgetAndTableWidget(self):
-    self.targetingPlugin.fiducialsWidget.addEventObserver(slicer.vtkMRMLMarkupsNode().MarkupAddedEvent,
+    self.targetingPlugin.fiducialsWidget.addEventObserver(slicer.vtkMRMLMarkupsNode().PointPositionDefinedEvent,
                                      self.updateAffectiveZoneAndDistance)
-    self.targetingPlugin.fiducialsWidget.addEventObserver(slicer.vtkMRMLMarkupsNode().MarkupRemovedEvent,
+    self.targetingPlugin.fiducialsWidget.addEventObserver(slicer.vtkMRMLMarkupsNode().PointPositionUndefinedEvent,
                                                           self.updateAffectiveZoneAndDistance)
     self.targetingPlugin.targetTablePlugin.addEventObserver(self.targetingPlugin.targetTablePlugin.TargetPosUpdatedEvent, self.updateAffectiveZoneAndDistance)
 
@@ -323,7 +324,8 @@ class ProstateAblationSession(StepBasedSession):
       slicer.mrmlScene.AddNode(self.segmentEditorNode)   
     self.segmentationEditor.setMRMLScene(slicer.mrmlScene)
     self.segmentationEditor.setMRMLSegmentEditorNode(self.segmentEditorNode)
-    self.segmentationEditorMaskOverWriteCombox.setCurrentIndex(self.segmentationEditorMaskOverWriteCombox.findText('None'))
+    # Removed, check...
+    #self.segmentationEditorMaskOverWriteCombox.setCurrentIndex(self.segmentationEditorMaskOverWriteCombox.findText('None'))
 
   def updateAffectiveZoneAndDistance(self, caller = None, event = None):
     self.updateAffectiveZone()
@@ -501,7 +503,7 @@ class ProstateAblationSession(StepBasedSession):
     currentInfo = self.getPatientInformation(dicomFileName)
     currentID = currentInfo["PatientID"]
     patientName = currentInfo["PatientName"]
-    for seriesNumber, receivedInfo in seriesNumberPatientID.iteritems():
+    for seriesNumber, receivedInfo in seriesNumberPatientID.items():
       patientID = receivedInfo["PatientID"]
       if patientID is not None and patientID != currentID:
         m = 'WARNING:\n' \
@@ -517,9 +519,12 @@ class ProstateAblationSession(StepBasedSession):
 
   def getPatientIDValidationSource(self):
     # TODO: For loading case purposes it would be nice to keep track which series were accepted
+    print(self.loadableList.keys())
     if len(self.loadableList.keys()) > 1:
-      keylist = self.loadableList.keys()
-      keylist.sort(key=lambda x: int(x.split(": ")[0]))
+      #keylist = list(self.loadableList.keys())
+      #keylist.sort(key=lambda x: int(x.split(": ")[0]))
+      #sorted(keylist, key=lambda x: int(x.split(": ")[0]))
+      keylist = sorted(self.loadableList.keys())#, key=lambda x: int(x.split(": ")[0]))
       return self.loadableList[keylist[0]][0]
     else:
       return None
@@ -528,10 +533,11 @@ class ProstateAblationSession(StepBasedSession):
     try:
       volume = self.alreadyLoadedSeries[series]
     except KeyError:
-      logging.info("Need to load volume")
+      logging.info("Need to load volume 2")
       files = self.loadableList[series]
       loadables = self.scalarVolumePlugin.examine([files])
-      success, volume = slicer.util.loadVolume(files[0], returnNode=True)
+      assert len(loadables)
+      volume = self.scalarVolumePlugin.load(loadables[0])
       volume.SetName(loadables[0].name)
       self.alreadyLoadedSeries[series] = volume
     slicer.app.processEvents()
@@ -546,7 +552,7 @@ class ProstateAblationSession(StepBasedSession):
         try:
           int(self.getDICOMValue(currentFile, DICOMTAGS.SERIES_NUMBER))
         except:
-          print "nothing: ", self.getDICOMValue(currentFile, DICOMTAGS.SERIES_NUMBER)
+          print("nothing: ", self.getDICOMValue(currentFile, DICOMTAGS.SERIES_NUMBER))
         currentSeriesNumber = int(self.getDICOMValue(currentFile, DICOMTAGS.SERIES_NUMBER))
         if currentSeriesNumber and currentSeriesNumber == seriesNumber:
           loadableList.append(currentFile)
@@ -704,6 +710,6 @@ class ProstateAblationSession(StepBasedSession):
   @onReturnProcessEvents
   def updateProgressBar(self, **kwargs):
     if self.progress:
-      for key, value in kwargs.iteritems():
+      for key, value in kwargs.items():
         if hasattr(self.progress, key):
           setattr(self.progress, key, value)

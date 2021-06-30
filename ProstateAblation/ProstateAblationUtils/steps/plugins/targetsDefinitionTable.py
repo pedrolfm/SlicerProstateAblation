@@ -300,7 +300,7 @@ class ZFrameGuidanceComputation(ModuleLogicMixin):
     self.targetList = targetList
     if self.targetList:
       self.observer = self.targetList.AddObserver(self.targetList.PointModifiedEvent, self.calculate)
-      self.observer = self.targetList.AddObserver(self.targetList.MarkupRemovedEvent, self.calculate)
+      self.observer = self.targetList.AddObserver(self.targetList.PointPositionUndefinedEvent, self.calculate)
     self.reset()
     self.calculate()
 
@@ -537,9 +537,9 @@ class TargetsDefinitionTable(ProstateAblationPlugin):
       self.keyReleaseEventObservers[interactor] = interactor.AddObserver("KeyReleaseEvent", self.onKeyReleasedEvent)
 
   def disconnectKeyEventObservers(self):
-    for interactor, tag in self.keyPressEventObservers.iteritems():
+    for interactor, tag in self.keyPressEventObservers.items():
       interactor.RemoveObserver(tag)
-    for interactor, tag in self.keyReleaseEventObservers.iteritems():
+    for interactor, tag in self.keyReleaseEventObservers.items():
       interactor.RemoveObserver(tag)
 
   def onKeyPressedEvent(self, caller, event):
@@ -655,7 +655,7 @@ class TargetsDefinitionTable(ProstateAblationPlugin):
     self.moveTargetMode = False
 
   def clearTargetMovementObserverAndAnnotations(self):
-    for widget, (observer, annotation) in self.mouseReleaseEventObservers.iteritems():
+    for widget, (observer, annotation) in self.mouseReleaseEventObservers.items():
       sliceView = widget.sliceView()
       interactor = sliceView.interactorStyle().GetInteractor()
       interactor.RemoveObserver(observer)

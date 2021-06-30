@@ -8,7 +8,7 @@ from ..base import ProstateAblationPlugin
 from SlicerDevelopmentToolboxUtils.helpers import SliceAnnotation
 from SlicerDevelopmentToolboxUtils.widgets import TargetCreationWidget
 from SlicerDevelopmentToolboxUtils.icons import Icons
-from targetsDefinitionTable import TargetsDefinitionTable
+from ProstateAblationUtils.steps.plugins.targetsDefinitionTable import TargetsDefinitionTable
 
 
 class TargetsDefinitionPlugin(ProstateAblationPlugin):
@@ -102,9 +102,9 @@ class TargetsDefinitionPlugin(ProstateAblationPlugin):
   def onFiducialListSelected(self, node):
     if node:
       self.fiducialsWidget.currentNode = node
-      self.fiducialsWidget.currentNode.AddObserver(slicer.vtkMRMLMarkupsNode().MarkupAddedEvent,
+      self.fiducialsWidget.currentNode.AddObserver(slicer.vtkMRMLMarkupsNode().PointPositionDefinedEvent,
                                                    self.onEndTargetPlacement)
-      self.fiducialsWidget.currentNode.AddObserver(slicer.vtkMRMLMarkupsNode().MarkupRemovedEvent,
+      self.fiducialsWidget.currentNode.AddObserver(slicer.vtkMRMLMarkupsNode().PointPositionUndefinedEvent,
                                                    self.onEndTargetRemove)
 
   def onEndTargetPlacement(self,interactionNode = None, event = None):
@@ -115,7 +115,7 @@ class TargetsDefinitionPlugin(ProstateAblationPlugin):
       self.fiducialsWidget.currentNode.SetNthFiducialPositionFromArray(currentTargetIndex,needleSnapPosition)
       self.session.displayForTargets[self.fiducialsWidget.currentNode.GetNthMarkupID(currentTargetIndex)] = qt.Qt.Unchecked
       self.session.needleTypeForTargets[self.fiducialsWidget.currentNode.GetNthMarkupID(currentTargetIndex)] = self.session.ISSEEDTYPE
-      self.fiducialsWidget.invokeEvent(slicer.vtkMRMLMarkupsNode().MarkupAddedEvent)
+      self.fiducialsWidget.invokeEvent(slicer.vtkMRMLMarkupsNode().PointPositionDefinedEvent)
     pass
 
   @vtk.calldata_type(vtk.VTK_INT)
@@ -136,7 +136,7 @@ class TargetsDefinitionPlugin(ProstateAblationPlugin):
         self.targetTablePlugin.comboBoxList[key] = tempComboBoxList.get(key)
         self.session.displayForTargets[key] = tempDisplayForTargets.get(key)
         self.session.needleTypeForTargets[key] = tempNeedleTypeForTargets.get(key)
-    self.fiducialsWidget.invokeEvent(slicer.vtkMRMLMarkupsNode().MarkupRemovedEvent)
+    self.fiducialsWidget.invokeEvent(slicer.vtkMRMLMarkupsNode().PointRemovedEvent)
 
   def onTargetingStarted(self, caller, event):
     self.invokeEvent(self.TargetingStartedEvent)

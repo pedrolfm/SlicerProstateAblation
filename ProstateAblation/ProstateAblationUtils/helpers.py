@@ -8,7 +8,7 @@ import slicer
 from SlicerDevelopmentToolboxUtils.decorators import logmethod
 from SlicerDevelopmentToolboxUtils.widgets import ExtendedQMessageBox
 
-from constants import ProstateAblationConstants as constants
+from ProstateAblationUtils.constants import ProstateAblationConstants as constants
 from SlicerDevelopmentToolboxUtils.module.logic import LogicBase
 from SlicerDevelopmentToolboxUtils.module.base import ModuleBase
 from SlicerDevelopmentToolboxUtils.mixins import ModuleWidgetMixin
@@ -177,7 +177,7 @@ class SeriesTypeManager(LogicBase):
 
   def _hasSeriesType(self, series, seriesType):
     listItems = [str(item) for item in seriesType]
-    if self.assignedSeries.has_key(series):
+    if series in self.assignedSeries:
       for serieName in listItems:
         if self.assignedSeries[series] == serieName:
           return True

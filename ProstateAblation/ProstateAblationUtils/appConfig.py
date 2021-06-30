@@ -1,7 +1,7 @@
-import ConfigParser
+import configparser as ConfigParser
 import inspect, os
 from SlicerDevelopmentToolboxUtils.mixins import ModuleWidgetMixin
-from constants import ProstateAblationConstants
+from ProstateAblationUtils.constants import ProstateAblationConstants
 
 class ConfigurationParser(ModuleWidgetMixin):
 
