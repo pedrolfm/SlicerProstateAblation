@@ -453,7 +453,9 @@ class TargetsDefinitionTable(ProstateAblationPlugin):
     for row in range(0, self.targetTableModel.rowCount()):
       self.targetTable.openPersistentEditor(self.targetTableModel.index(row, self.displayCol))
       self.targetTable.openPersistentEditor(self.targetTableModel.index(row, self.needleTypeCol))
+      print(self.comboBoxList.keys())
       storedIndex = self.comboBoxList[self.currentTargets.GetNthMarkupID(row)].findText(self.session.needleTypeForTargets[self.currentTargets.GetNthMarkupID(row)])
+      print(storedIndex)
       self.comboBoxList[self.currentTargets.GetNthMarkupID(row)].setCurrentIndex(storedIndex)
     if self.currentTargets:
       self.onTargetSelectionChanged()
